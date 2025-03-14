@@ -20,6 +20,7 @@
 
 #include <jni.h>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <tesseract/baseapi.h>
 
 #include "detection_image.hpp"
 #include "matching_results.hpp"
@@ -51,6 +52,9 @@ namespace smartautoclicker {
         /** The results of the condition detection. */
         DetectionResult detectionResult = DetectionResult();
 
+        /** Tesseract OCR engine */
+        tesseract::TessBaseAPI *tessBaseAPI;
+
         /**
          * Check if the provided condition is found in the current screen image.
          * The screen image should be set with [setScreenImage], and the detection roi should be up to date before
@@ -61,6 +65,8 @@ namespace smartautoclicker {
          * @param threshold the detection threshold, expressed in [0..1].
          */
         void match(JNIEnv *env, jobject conditionImage, int threshold);
+
+        void match(JNIEnv *env, jobject conditionImage, std::string identifying);
 
         /** Verify if the matching result is above the provided threshold. */
         static bool isResultAboveThreshold(const MatchingResults& results, int threshold);
@@ -117,6 +123,16 @@ namespace smartautoclicker {
         void detectCondition(JNIEnv *env, jobject conditionImage, int threshold);
 
         /**
+         * Check if the provided image is contained in the image defined with [setScreenImage].
+         * [detectionResult] structure will be updated accordingly.
+         *
+         * @param env current java env.
+         * @param conditionImage the image to search.
+         * @param identifying the recognised information to consider the detection position.
+         */
+        void detectCondition(JNIEnv *env, jobject conditionImage, std::string identifying);
+
+        /**
          * Check if the provided image is contained in a specific area within the image defined with [setScreenImage].
          * [detectionResult] structure will be updated accordingly.
          *
@@ -129,6 +145,20 @@ namespace smartautoclicker {
          * @param threshold the minimum detection confidence to consider the detection position.
          */
         void detectCondition(JNIEnv *env, jobject conditionImage, int x, int y, int width, int height, int threshold);
+
+        /**
+         * Check if the provided image is contained in a specific area within the image defined with [setScreenImage].
+         * [detectionResult] structure will be updated accordingly.
+         *
+         * @param env current java env.
+         * @param conditionImage the image to search.
+         * @param x the left position of the area to search in.
+         * @param y the top position of the area to search in.
+         * @param width the width of the area to search in.
+         * @param height the height of the area to search in.
+         * @param identifying the recognised information to consider the detection position.
+         */
+        void detectCondition(JNIEnv *env, jobject conditionImage, int x, int y, int width, int height, std::string identifying);
     };
 }
 

@@ -60,6 +60,17 @@ interface ImageDetector : AutoCloseable {
     fun detectCondition(conditionBitmap: Bitmap, threshold: Int): DetectionResult
 
     /**
+     * Detect if the bitmap is in the whole current screen bitmap.
+     * [setupDetection] must have been called first with the content of the screen.
+     *
+     * @param conditionBitmap the condition to detect in the screen.
+     * @param identifying the recognised information to consider the detection position.
+     *
+     * @return the results of the detection.
+     */
+    fun detectCondition(conditionBitmap: Bitmap, identifying: String): DetectionResult
+
+    /**
      * Detect if the bitmap is at a specific position in the current screen bitmap.
      * [setupDetection] must have been called first with the content of the screen.
      *
@@ -70,6 +81,18 @@ interface ImageDetector : AutoCloseable {
      * @return the results of the detection.
      */
     fun detectCondition(conditionBitmap: Bitmap, position: Rect, threshold: Int): DetectionResult
+
+    /**
+     * Detect if the bitmap is at a specific position in the current screen bitmap.
+     * [setupDetection] must have been called first with the content of the screen.
+     *
+     * @param conditionBitmap the condition to detect in the screen.
+     * @param position the position on the screen where the condition should be detected.
+     * @param identifying the recognised information to consider the detection position.
+     *
+     * @return the results of the detection.
+     */
+    fun detectCondition(conditionBitmap: Bitmap, position: Rect, identifying: String): DetectionResult
 }
 
 /** The minimum detection quality for the algorithm. */

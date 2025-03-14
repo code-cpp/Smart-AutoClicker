@@ -16,6 +16,8 @@
  */
 
 #include <opencv2/imgproc/imgproc_c.h>
+#include <tesseract/baseapi.h>
+#include <leptonica/allheaders.h>
 
 #include "../utils/log.h"
 #include "../utils/scaling.hpp"
@@ -27,6 +29,8 @@ using namespace smartautoclicker;
 
 void Detector::initialize(JNIEnv *env, jobject results) {
     detectionResult.attachToJavaObject(env, results);
+    tessBaseAPI = new tesseract::TessBaseAPI();
+    tessBaseAPI->Init(NULL, "chi_sim"); // Use "eng" for English, change as needed
     LOGD(LOG_TAG, "Initialized");
 }
 
@@ -66,6 +70,16 @@ void Detector::detectCondition(JNIEnv *env, jobject conditionBitmap, int thresho
 void Detector::detectCondition(JNIEnv *env, jobject conditionBitmap, int x, int y, int width, int height, int threshold) {
     detectionRoi.setFullSize(x, y, width, height, scaleRatioManager.getScaleRatio());
     match(env, conditionBitmap, threshold);
+}
+
+void Detector::detectCondition(JNIEnv *env, jobject conditionImage, std::string identifying) {
+    detectionRoi.setFullSize(screenImage.fullSizeRoi, scaleRatioManager.getScaleRatio());
+    match(env, conditionBitmap, identifying);
+}
+
+void Detector::detectCondition(JNIEnv *env, jobject conditionBitmap, int x, int y, int width, int height, std::string identifying) {
+    detectionRoi.setFullSize(x, y, width, height, scaleRatioManager.getScaleRatio());
+    match(env, conditionBitmap, identifying);
 }
 
 void Detector::match(JNIEnv *env, jobject conditionBitmap, int threshold) {
@@ -116,6 +130,78 @@ void Detector::match(JNIEnv *env, jobject conditionBitmap, int threshold) {
         if (colorDiff < threshold) {
             isFound = true;
             break;
+        }
+    }
+
+    // Set the results to the java object
+    detectionResult.setResults(
+            env,
+            isFound,
+            detectionRoi.fullSize.x + matchingResults.roi.fullSizeCenterX(),
+            detectionRoi.fullSize.y + matchingResults.roi.fullSizeCenterY(),
+            matchingResults.maxVal);
+}
+
+void Detector::match(JNIEnv *env, jobject conditionBitmap, std::string identifying) {
+    // Check of dimensions are valid
+    if (!screenImage.isFullSizeContains(detectionRoi.fullSize) || !screenImage.isScaledContains(detectionRoi.scaled)) {
+        LOGE(LOG_TAG, "Detection ROI is invalid, skipping condition");
+        detectionResult.clearResults(env);
+        return;
+    }
+
+    // Read condition bitmap image
+    conditionImage.processBitmap(env, conditionBitmap, scaleRatioManager.getScaleRatio());
+
+    // Crop the scaled gray current image to only get the detection area and verify it is equals or bigger than the condition
+    screenImage.setCropping(detectionRoi);
+    if (!screenImage.isCroppedScaledContains(conditionImage.scaledSize)) {
+        LOGE(LOG_TAG, "Condition is bigger than screen image, skipping it");
+        detectionResult.clearResults(env);
+        return;
+    }
+
+    // Get the matching results
+    cv::matchTemplate(
+            *screenImage.croppedScaledGray,
+            *conditionImage.scaledGray,
+            *matchingResults.initResults(*screenImage.croppedScaledGray, *conditionImage.scaledGray),
+            cv::TM_CCOEFF_NORMED);
+
+    // Until a condition is detected or none fits
+    bool isFound = false;
+    int repeatCycle = 0;
+    while (true) {
+        // Find new best matching candidate location
+        matchingResults.locateNextMinMax(*conditionImage.scaledGray, scaleRatioManager.getScaleRatio());
+
+        // If the found Roi is out of bounds, invalid match, keep looking
+        if (!screenImage.isScaledContains(matchingResults.roi.scaled)) {
+            continue;
+        }
+
+        auto image = screenImage.fullSizeColor;
+        // Convert OpenCV image to Leptonica Pix format
+        Pix *pix = pixCreate(image.size().width, image.size().height, 32);
+        // Copy image data to Pix
+        memcpy(pixGetData(pix), image.data, image.total() * image.elemSize());
+
+        // Perform OCR
+        tessBaseAPI->SetImage(pix);
+        std::string ocrText = tessBaseAPI->GetUTF8Text();
+        // compare result
+        string::size_type idx = ocrText.find(identifying);
+        if (idx != string::npos) {
+            // Cleanup
+            pixDestroy(&pix);
+            isFound = true;
+            break;
+        }
+        repeatCycle ++;
+        if (repeatCycle >= 100) {
+            LOGE(LOG_TAG, "RepeatCycle great than 100, means timeout");
+            detectionResult.clearResults(env);
+            return;
         }
     }
 

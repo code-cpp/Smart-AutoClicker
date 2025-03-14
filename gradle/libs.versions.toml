@@ -35,6 +35,7 @@ googleMaterial = "1.12.0"
 kotlinSerializationJson = "1.6.3"
 openCv = "4.9.0"
 googleDaggerHilt = "2.55"
+tesseract = "4.8.0"
 
 # PlayStore only
 androidBillingClient = "7.1.1"
@@ -107,6 +108,7 @@ kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", vers
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
 google-dagger-hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "googleDaggerHilt" }
 google-dagger-hilt-testing = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "googleDaggerHilt" }
+tesseract = { module = "cz.adaptech.tesseract4android:tesseract4android", version.ref = "tesseract" }
 
 # PlayStore only. Might seem unused but check in files if that is the case
 android-billingClient = { group = "com.android.billingclient", name = "billing", version.ref = "androidBillingClient" }

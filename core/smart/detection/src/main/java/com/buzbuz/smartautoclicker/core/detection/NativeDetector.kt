@@ -84,10 +84,25 @@ class NativeDetector private constructor() : ImageDetector {
         return detectionResult.copy()
     }
 
+    override fun detectCondition(conditionBitmap: Bitmap, identifying: String): DetectionResult {
+        if (isClosed) return detectionResult.copy()
+
+        detect(conditionBitmap, identifying)
+        return detectionResult.copy()
+    }
+
+
     override fun detectCondition(conditionBitmap: Bitmap, position: Rect, threshold: Int): DetectionResult {
         if (isClosed) return detectionResult.copy()
 
         detectAt(conditionBitmap, position.left, position.top, position.width(), position.height(), threshold, detectionResult)
+        return detectionResult.copy()
+    }
+
+    override fun detectCondition(conditionBitmap: Bitmap, position: Rect, identifying: String): DetectionResult {
+        if (isClosed) return detectionResult.copy()
+
+        detectAt(conditionBitmap, position.left, position.top, position.width(), position.height(), identifying, detectionResult)
         return detectionResult.copy()
     }
 
@@ -130,6 +145,14 @@ class NativeDetector private constructor() : ImageDetector {
     private external fun detect(conditionBitmap: Bitmap, threshold: Int)
 
     /**
+     * Native method for detecting if the bitmap is in the whole current screen bitmap.
+     *
+     * @param conditionBitmap the condition to detect in the screen.
+     * @param identifying the recognised information to consider the detection position.
+     */
+    private external fun detect(conditionBitmap: Bitmap, identifying: String)
+
+    /**
      * Native method for detecting if the bitmap is at a specific position in the current screen bitmap.
      *
      * @param conditionBitmap the condition to detect in the screen.
@@ -146,6 +169,26 @@ class NativeDetector private constructor() : ImageDetector {
         width: Int,
         height: Int,
         threshold: Int,
+        result: DetectionResult
+    )
+
+    /**
+     * Native method for detecting if the bitmap is at a specific position in the current screen bitmap.
+     *
+     * @param conditionBitmap the condition to detect in the screen.
+     * @param x the horizontal position of the condition.
+     * @param y the vertical position of the condition.
+     * @param width the width of the condition.
+     * @param height the height of the condition.
+     * @param identifying the recognised information to consider the detection position.
+     */
+    private external fun detectAt(
+        conditionBitmap: Bitmap,
+        x: Int,
+        y: Int,
+        width: Int,
+        height: Int,
+        identifying: String,
         result: DetectionResult
     )
 }

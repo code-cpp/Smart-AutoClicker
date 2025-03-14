@@ -15,6 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+buildscript {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+        maven { setUrl("https://jitpack.io") }
+    }
+}
+
 plugins {
     alias(libs.plugins.androidApplication) apply false
     alias(libs.plugins.androidLibrary) apply false
