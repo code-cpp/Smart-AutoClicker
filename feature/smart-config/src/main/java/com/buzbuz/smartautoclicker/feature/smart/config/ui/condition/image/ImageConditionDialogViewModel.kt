@@ -81,6 +81,10 @@ class ImageConditionViewModel @Inject constructor(
     val shouldBeDetected: Flow<Boolean> = configuredCondition
         .map { condition -> condition.shouldBeDetected }
 
+    /** Tells if the condition should be present or not on the screen. */
+    val ifDetectedViaOCR: Flow<Boolean> = configuredCondition
+        .map { condition -> condition.ifDetectedViaOCR }
+
     /** The type of detection currently selected by the user. */
     val detectionType: Flow<DetectionTypeState> = configuredCondition
         .map { condition ->
@@ -114,6 +118,13 @@ class ImageConditionViewModel @Inject constructor(
     fun toggleShouldBeDetected() {
         updateEditedCondition { oldCondition ->
             oldCondition.copy(shouldBeDetected = !oldCondition.shouldBeDetected)
+        }
+    }
+
+    /** Set the ifDetectedViaOCR value of the condition. */
+    fun toggleIfDetectedViaOCR() {
+        updateEditedCondition { oldCondition ->
+            oldCondition.copy(ifDetectedViaOCR = !oldCondition.ifDetectedViaOCR)
         }
     }
 

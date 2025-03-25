@@ -48,6 +48,8 @@ internal class EditionDefaultValues(private val scenarioRepository: IRepository)
         EXACT
     fun conditionShouldBeDetected(): Boolean =
         true
+    fun conditionIfDetectedViaOCR(): Boolean =
+        true
 
     fun clickName(context: Context): String =
         context.getString(R.string.default_click_name)

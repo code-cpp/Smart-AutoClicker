@@ -20,6 +20,7 @@
     <!-- Those values are shared between several dialogs due to their generic meaning, such as name -->
 
     <string name="generic_name">Nome</string>
+    <string name="generic_condition_name">Name/Recognizing string</string>
     <string name="generic_select_the_position">Selecione a posição</string>
     <string name="generic_config">Configuração</string>
     <string name="generic_counters">Contadores</string>
@@ -176,6 +177,10 @@
     <string name="field_condition_visibility_title">Visibilidade</string>
     <string name="field_condition_visibility_desc_present">A condição deve ser detectada</string>
     <string name="field_condition_visibility_desc_absent">A condição não deve ser detectada</string>
+
+    <string name="field_condition_if_use_ocr_title">Use OCR</string>
+    <string name="field_condition_if_use_ocr_desc_present">Selected, Use OCR</string>
+    <string name="field_condition_if_use_ocr_desc_absent">No selected, No OCR</string>
 
     <string name="field_detection_type_title">Tipo de detecção</string>
     <string name="field_detection_type_desc_exact">Detecção na posição capturada</string>

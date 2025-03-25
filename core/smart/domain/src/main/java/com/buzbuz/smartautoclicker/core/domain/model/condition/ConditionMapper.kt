@@ -40,6 +40,7 @@ internal fun ImageCondition.toEntity() = ConditionEntity(
     threshold = threshold,
     detectionType = detectionType,
     shouldBeDetected = shouldBeDetected,
+    ifDetectedViaOCR = ifDetectedViaOCR,
     detectionAreaLeft = detectionArea?.left,
     detectionAreaTop = detectionArea?.top,
     detectionAreaRight = detectionArea?.right,
@@ -113,6 +114,7 @@ private fun ConditionEntity.toDomainImageCondition(cleanIds: Boolean = false): I
         detectionType = detectionType!!,
         detectionArea = getDetectionArea(),
         shouldBeDetected = shouldBeDetected ?: true,
+        ifDetectedViaOCR = ifDetectedViaOCR ?: false,
     )
 
 private fun ConditionEntity.toDomainBroadcastReceived(cleanIds: Boolean = false): TriggerCondition =

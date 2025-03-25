@@ -45,6 +45,7 @@ data class ImageCondition(
     val threshold: Int,
     @DetectionType val detectionType: Int,
     val shouldBeDetected: Boolean,
+    val ifDetectedViaOCR: Boolean,
     val detectionArea: Rect? = null,
 ): Condition(), Prioritizable {
 
@@ -60,5 +61,5 @@ data class ImageCondition(
 
     override fun hashCodeNoIds(): Int =
         name.hashCode() + path.hashCode() + area.hashCode() + threshold.hashCode() + detectionType.hashCode() +
-                shouldBeDetected.hashCode() + detectionArea.hashCode() + priority.hashCode()
+            shouldBeDetected.hashCode() + ifDetectedViaOCR.hashCode() + detectionArea.hashCode() + priority.hashCode()
 }

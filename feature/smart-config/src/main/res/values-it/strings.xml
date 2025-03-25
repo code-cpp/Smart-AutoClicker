@@ -213,6 +213,7 @@
       - Should be short and concise.
       -->
     <string name="generic_name">Nome</string>
+    <string name="generic_condition_name">Name/Recognizing string</string>
     <string name="field_intent_extra_key_label">Chiave</string>
     <string name="field_event_state_title">Stato</string>
     <string name="field_counter_operation_value_label">Valore</string>
@@ -251,6 +252,10 @@
     <string name="field_condition_visibility_title">Visibilità</string>
     <string name="field_condition_visibility_desc_present">La condizione deve essere rilevata</string>
     <string name="field_condition_visibility_desc_absent">La condizione deve essere non rilevata</string>
+
+    <string name="field_condition_if_use_ocr_title">Use OCR</string>
+    <string name="field_condition_if_use_ocr_desc_present">Selected, Use OCR</string>
+    <string name="field_condition_if_use_ocr_desc_absent">No selected, No OCR</string>
 
     <!-- Dropdown field for selecting the click position type -->
     <string name="field_click_type_title">Clicca su</string>

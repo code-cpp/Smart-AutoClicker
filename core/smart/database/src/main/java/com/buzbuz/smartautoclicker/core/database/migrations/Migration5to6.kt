@@ -39,6 +39,8 @@ object Migration5to6 : Migration(5, 6) {
 
     private val conditionShouldBeDetectedColumn =
         SQLiteColumn.Boolean("shouldBeDetected", defaultValue = "1")
+    private val conditionIfDetectedViaOCRColumn =
+        SQLiteColumn.Boolean("ifDetectedViaOCR", defaultValue = "1")
 
     private val actionIdColumn = SQLiteColumn.PrimaryKey()
     private val actionTypeColumn = SQLiteColumn.Text("type")

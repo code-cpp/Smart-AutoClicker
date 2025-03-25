@@ -55,6 +55,7 @@ internal object ProcessingData {
         threshold: Int,
         @DetectionType detectionType: Int,
         shouldBeDetected: Boolean = true,
+        ifDetectedViaOCR: Boolean = false,
     ) = ImageCondition(
         Identifier(databaseId = 1L),
         Identifier(databaseId = 1L),
@@ -65,6 +66,7 @@ internal object ProcessingData {
         threshold,
         detectionType,
         shouldBeDetected,
+        ifDetectedViaOCR,
         null
     )
 }

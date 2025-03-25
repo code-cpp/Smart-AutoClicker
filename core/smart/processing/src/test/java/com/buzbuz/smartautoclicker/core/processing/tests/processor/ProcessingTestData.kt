@@ -155,6 +155,7 @@ internal object ProcessingTestData {
             id = conditionId,
             eventId = eventId,
             shouldBeDetected = shouldBeDetected,
+            ifDetectedViaOCR = false,
             path = conditionId.databaseId.toString(),
             detectionType = detectionType,
             area = Rect(0, 0, TEST_DATA_CONDITION_IMAGE_WIDTH, TEST_DATA_CONDITION_IMAGE_HEIGHT),

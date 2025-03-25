@@ -142,6 +142,7 @@ class EditedItemsBuilder internal constructor(
             threshold = defaultValues.conditionThreshold(context),
             detectionType = defaultValues.conditionDetectionType(),
             shouldBeDetected = defaultValues.conditionShouldBeDetected(),
+            ifDetectedViaOCR = defaultValues.conditionIfDetectedViaOCR(),
             path = newPath,
             priority = 0,
         )

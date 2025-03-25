@@ -77,6 +77,7 @@ data class ConditionEntity(
     @ColumnInfo(name = "threshold") val threshold: Int? = null,
     @ColumnInfo(name = "detection_type") val detectionType: Int? = null,
     @ColumnInfo(name = "shouldBeDetected") val shouldBeDetected: Boolean? = null,
+    @ColumnInfo(name = "ifDetectedViaOCR") val ifDetectedViaOCR: Boolean? = null,
     @ColumnInfo(name = "detection_area_left") val detectionAreaLeft: Int? = null,
     @ColumnInfo(name = "detection_area_top") val detectionAreaTop: Int? = null,
     @ColumnInfo(name = "detection_area_right") val detectionAreaRight: Int? = null,

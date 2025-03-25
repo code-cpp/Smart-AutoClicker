@@ -88,6 +88,11 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"/>
 
+                    <include layout="@layout/include_field_switch"
+                        android:id="@+id/field_detect_viaOCR"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>

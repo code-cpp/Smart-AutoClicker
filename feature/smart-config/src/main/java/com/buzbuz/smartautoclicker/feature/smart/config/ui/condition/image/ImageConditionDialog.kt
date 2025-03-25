@@ -98,7 +98,7 @@ class ImageConditionDialog(
             }
 
             fieldEditName.apply {
-                setLabel(R.string.generic_name)
+                setLabel(R.string.generic_condition_name)
                 setOnTextChangedListener { viewModel.setName(it.toString()) }
                 textField.filters = arrayOf<InputFilter>(
                     InputFilter.LengthFilter(context.resources.getInteger(R.integer.name_max_length))
@@ -115,6 +115,17 @@ class ImageConditionDialog(
                     )
                 )
                 setOnClickListener { viewModel.toggleShouldBeDetected() }
+            }
+
+            fieldDetectViaOCR.apply {
+                setTitle(context.getString(R.string.field_condition_if_use_ocr_title))
+                setupDescriptions(
+                    listOf(
+                        context.getString(R.string.field_condition_if_use_ocr_desc_absent),
+                        context.getString(R.string.field_condition_if_use_ocr_desc_present),
+                    )
+                )
+                setOnClickListener { viewModel.toggleIfDetectedViaOCR() }
             }
 
             fieldDetectionType.apply {
@@ -167,6 +178,7 @@ class ImageConditionDialog(
                 launch { viewModel.nameError.collect(viewBinding.fieldEditName::setError) }
                 launch { viewModel.conditionBitmap.collect(::updateConditionBitmap) }
                 launch { viewModel.shouldBeDetected.collect(::updateShouldBeDetected) }
+                launch { viewModel.ifDetectedViaOCR.collect(::updateIfDetectedViaOCR) }
                 launch { viewModel.detectionType.collect(::updateDetectionType) }
                 launch { viewModel.threshold.collect(::updateThreshold) }
                 launch { viewModel.conditionCanBeSaved.collect(::updateSaveButton) }
@@ -225,6 +237,13 @@ class ImageConditionDialog(
 
     private fun updateShouldBeDetected(newValue: Boolean) {
         viewBinding.fieldShouldAppear.apply {
+            setChecked(newValue)
+            setDescription(if (newValue) 1 else 0)
+        }
+    }
+
+    private fun updateIfDetectedViaOCR(newValue: Boolean) {
+        viewBinding.fieldDetectViaOCR.apply {
             setChecked(newValue)
             setDescription(if (newValue) 1 else 0)
         }

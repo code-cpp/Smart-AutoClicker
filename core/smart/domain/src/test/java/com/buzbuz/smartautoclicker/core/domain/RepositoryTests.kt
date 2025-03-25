@@ -184,6 +184,7 @@ class RepositoryTests {
                 threshold = 10,
                 detectionType = EXACT,
                 shouldBeDetected = true,
+                ifDetectedViaOCR = false,
                 area = Rect(0, 0, 20, 100),
                 path = "toto",
                 priority = 0,

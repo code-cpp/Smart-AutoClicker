@@ -40,6 +40,7 @@ fun IncludeImageConditionCardBinding.bind(
 
     conditionName.text = uiCondition.name
     conditionShouldBeDetected.setImageResource(uiCondition.shouldBeVisibleIconRes)
+    conditionIfDetectedViaOCR.setImageResource(uiCondition.shouldBeVisibleIconRes)
     conditionDetectionType.setImageResource(uiCondition.detectionTypeIconRes)
     conditionThreshold.text = uiCondition.thresholdText
 

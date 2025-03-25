@@ -61,6 +61,7 @@ private fun assertSameConditionNoIdCheck(expected: ImageCondition, actual: Image
     "Conditions are not the same",
     expected.name == actual.name
             && expected.shouldBeDetected == actual.shouldBeDetected
+            && expected.ifDetectedViaOCR == actual.ifDetectedViaOCR
             && expected.area == actual.area
             && expected.detectionType == actual.detectionType
             && expected.threshold == actual.threshold

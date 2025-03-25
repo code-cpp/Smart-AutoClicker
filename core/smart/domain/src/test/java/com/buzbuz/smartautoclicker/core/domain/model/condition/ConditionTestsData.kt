@@ -59,9 +59,10 @@ internal object ConditionTestsData {
         threshold: Int = CONDITION_THRESHOLD,
         detectionType: Int = CONDITION_DETECTION_TYPE,
         shouldBeDetected: Boolean = true,
+        ifDetectedViaOCR: Boolean = false,
         eventId: Long
     ) = ConditionEntity(id, eventId, name, ConditionType.ON_IMAGE_DETECTED, priority, path, area.left, area.top, area.right,
-        area.bottom, threshold, detectionType, shouldBeDetected, detectionArea?.left, detectionArea?.top, detectionArea?.right, detectionArea?.bottom)
+        area.bottom, threshold, detectionType, shouldBeDetected, ifDetectedViaOCR, detectionArea?.left, detectionArea?.top, detectionArea?.right, detectionArea?.bottom)
 
     fun getNewImageCondition(
         id: Long = CONDITION_ID,
@@ -73,8 +74,9 @@ internal object ConditionTestsData {
         threshold: Int = CONDITION_THRESHOLD,
         detectionType: Int = CONDITION_DETECTION_TYPE,
         shouldBeDetected: Boolean = true,
+        ifDetectedViaOCR: Boolean = false,
         eventId: Long
-    ) = ImageCondition(id.asIdentifier(), eventId.asIdentifier(), name, priority, path, area, threshold, detectionType, shouldBeDetected, detectionArea)
+    ) = ImageCondition(id.asIdentifier(), eventId.asIdentifier(), name, priority, path, area, threshold, detectionType, shouldBeDetected, ifDetectedViaOCR, detectionArea)
 
     fun getNewBroadcastReceivedConditionEntity(
         id: Long = CONDITION_ID,

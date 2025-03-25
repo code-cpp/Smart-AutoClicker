@@ -216,6 +216,7 @@
       - Should be short and concise.
       -->
     <string name="generic_name">名称</string>
+    <string name="generic_condition_name">名称/待识别字符串</string>
     <string name="field_intent_extra_key_label">参数名</string>
     <string name="field_event_state_title">状态</string>
     <string name="field_counter_operation_value_label">价值</string>
@@ -254,6 +255,11 @@
     <string name="field_condition_visibility_title">存在与否</string>
     <string name="field_condition_visibility_desc_present">这个细节存在时，条件生效</string>
     <string name="field_condition_visibility_desc_absent">这个细节不存在时，条件生效</string>
+
+    <!-- Dropdown field for selecting the condition visibility. -->
+    <string name="field_condition_if_use_ocr_title">使用OCR</string>
+    <string name="field_condition_if_use_ocr_desc_present">选中时，使用OCR</string>
+    <string name="field_condition_if_use_ocr_desc_absent">未选中，不用OCR</string>
 
     <!-- Dropdown field for selecting the click position type -->
     <string name="field_click_type_title">单击位置</string>
