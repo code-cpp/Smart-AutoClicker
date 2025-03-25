@@ -77,6 +77,13 @@ fastlane/readme.md
 # Version control
 vcs.xml
 
+.idea/AndroidProjectSystem.xml
+.idea/deploymentTargetSelector.xml
+.idea/kotlinc.xml
+.idea/runConfigurations.xml
+smartautoclicker/fDroid/
+.kotlin/sessions/kotlin-compiler-*.salive
+
 # lint
 lint/intermediates/
 lint/generated/
