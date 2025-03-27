@@ -140,14 +140,26 @@ internal class ConditionsVerifier(
         val result = bitmapSupplier(condition)?.let { conditionBitmap ->
             val detectionResult = when (condition.detectionType) {
                 EXACT ->
-                    imageDetector.detectCondition(conditionBitmap, condition.area, condition.threshold)
+                    if (condition.ifDetectedViaOCR) {
+                        imageDetector.detectCondition(conditionBitmap, condition.area, condition.name)
+                    } else {
+                        imageDetector.detectCondition(conditionBitmap, condition.area, condition.threshold)
+                    }
 
                 WHOLE_SCREEN ->
-                    imageDetector.detectCondition(conditionBitmap, condition.threshold)
+                    if (condition.ifDetectedViaOCR) {
+                        imageDetector.detectCondition(conditionBitmap, condition.name)
+                    } else {
+                        imageDetector.detectCondition(conditionBitmap, condition.threshold)
+                    }
 
                 IN_AREA ->
                     condition.detectionArea?.let { area ->
-                        imageDetector.detectCondition(conditionBitmap, area, condition.threshold)
+                        if (condition.ifDetectedViaOCR) {
+                            imageDetector.detectCondition(conditionBitmap, area, condition.name)
+                        } else {
+                            imageDetector.detectCondition(conditionBitmap, area, condition.threshold)
+                        }
                     } ?: throw IllegalArgumentException("Invalid IN_AREA condition, no area defined")
 
                 else -> throw IllegalArgumentException("Unexpected detection type")

@@ -100,7 +100,46 @@ ELSEIF(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/release/opencv")
     include_directories (${CMAKE_BINARY_DIR})
 ENDIF()
 
+IF(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/ocrlib/libs)
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} -E tar -xvf ${CMAKE_CURRENT_SOURCE_DIR}/ocrlib/ocrlib.tar.bz2
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/ocrlib
+        RESULT_VARIABLE result
+    )
+ENDIF()
+
+set(PREBUILT_OCRLIB_PATH ${CMAKE_CURRENT_SOURCE_DIR}/ocrlib)
+
+add_library( jpeg SHARED IMPORTED )
+set_target_properties(
+        jpeg
+        PROPERTIES IMPORTED_LOCATION
+        ${PREBUILT_OCRLIB_PATH}/libs/${ANDROID_ABI}/libjpeg.so )
+
+add_library( pngx SHARED IMPORTED )
+set_target_properties(
+        pngx
+        PROPERTIES IMPORTED_LOCATION
+        ${PREBUILT_OCRLIB_PATH}/libs/${ANDROID_ABI}/libpngx.so )
+
+add_library( leptonica SHARED IMPORTED )
+set_target_properties(
+        leptonica
+        PROPERTIES IMPORTED_LOCATION
+        ${PREBUILT_OCRLIB_PATH}/libs/${ANDROID_ABI}/libleptonica.so )
+
+add_library( tesseract SHARED IMPORTED )
+set_target_properties(
+        tesseract
+        PROPERTIES IMPORTED_LOCATION
+        ${PREBUILT_OCRLIB_PATH}/libs/${ANDROID_ABI}/libtesseract.so )
+
+target_include_directories(
+        smartautoclicker
+        PUBLIC
+        ${PREBUILT_OCRLIB_PATH}/include )
+
 # Specifies libraries CMake should link to your target library. You
 # can link multiple libraries, such as libraries you define in this
 # build script, prebuilt third-party libraries, or system libraries.
-target_link_libraries(smartautoclicker opencv_core opencv_imgproc -ljnigraphics ${log-lib} )
+target_link_libraries(smartautoclicker opencv_core opencv_imgproc jpeg pngx leptonica tesseract -ljnigraphics ${log-lib} )

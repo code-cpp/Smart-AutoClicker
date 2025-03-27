@@ -25,12 +25,26 @@
 using namespace smartautoclicker;
 
 
-void Detector::initialize(JNIEnv *env, jobject results) {
+void Detector::initialize(JNIEnv *env, jobject results, jstring dataPath, jstring language) {
     detectionResult.attachToJavaObject(env, results);
+    const char *dataPathCStr = env->GetStringUTFChars(dataPath, nullptr);
+    const char *languageCStr = env->GetStringUTFChars(language, nullptr);
+    tessBaseAPI = new tesseract::TessBaseAPI();
+    if (tessBaseAPI == nullptr) {
+        LOGE(LOG_TAG, "tessBaseAPI is nullptr");
+        return;
+    }
+    if (tessBaseAPI->Init(dataPathCStr, languageCStr)) { // Use "eng" for English, change as needed
+        LOGE(LOG_TAG, "tesseract initialize failed");
+        return;
+    }
     LOGD(LOG_TAG, "Initialized");
 }
 
 void Detector::release(JNIEnv *env) {
+    if (tessBaseAPI != nullptr) {
+        tessBaseAPI->End();
+    }
     detectionResult.detachFromJavaObject(env);
     LOGD(LOG_TAG, "Released");
 }
@@ -66,6 +80,18 @@ void Detector::detectCondition(JNIEnv *env, jobject conditionBitmap, int thresho
 void Detector::detectCondition(JNIEnv *env, jobject conditionBitmap, int x, int y, int width, int height, int threshold) {
     detectionRoi.setFullSize(x, y, width, height, scaleRatioManager.getScaleRatio());
     match(env, conditionBitmap, threshold);
+}
+
+void Detector::detectConditionOCR(JNIEnv *env, jobject conditionBitmap, jstring identifying) {
+    detectionRoi.setFullSize(screenImage.fullSizeRoi, scaleRatioManager.getScaleRatio());
+    const char *ocr_tag = env->GetStringUTFChars(identifying, nullptr);
+    matchOCR(env, conditionBitmap, ocr_tag);
+}
+
+void Detector::detectConditionOCR(JNIEnv *env, jobject conditionBitmap, int x, int y, int width, int height, jstring identifying) {
+    detectionRoi.setFullSize(x, y, width, height, scaleRatioManager.getScaleRatio());
+    const char *ocr_tag = env->GetStringUTFChars(identifying, nullptr);
+    matchOCR(env, conditionBitmap, ocr_tag);
 }
 
 void Detector::match(JNIEnv *env, jobject conditionBitmap, int threshold) {
@@ -128,6 +154,72 @@ void Detector::match(JNIEnv *env, jobject conditionBitmap, int threshold) {
             matchingResults.maxVal);
 }
 
+void Detector::matchOCR(JNIEnv *env, jobject conditionBitmap, const char* identifying) {
+    // Check of dimensions are valid
+    if (!screenImage.isFullSizeContains(detectionRoi.fullSize) || !screenImage.isScaledContains(detectionRoi.scaled)) {
+        LOGE(LOG_TAG, "Detection ROI is invalid, skipping condition");
+        detectionResult.clearResults(env);
+        return;
+    }
+
+    // Read condition bitmap image
+    conditionImage.processBitmap(env, conditionBitmap, scaleRatioManager.getScaleRatio());
+
+    // Crop the scaled gray current image to only get the detection area and verify it is equals or bigger than the condition
+    screenImage.setCropping(detectionRoi);
+    if (!screenImage.isCroppedScaledContains(conditionImage.scaledSize)) {
+        LOGE(LOG_TAG, "Condition is bigger than screen image, skipping it");
+        detectionResult.clearResults(env);
+        return;
+    }
+
+    // Get the matching results
+    cv::matchTemplate(
+            *screenImage.croppedScaledGray,
+            *conditionImage.scaledGray,
+            *matchingResults.initResults(*screenImage.croppedScaledGray, *conditionImage.scaledGray),
+            cv::TM_CCOEFF_NORMED);
+
+    // Until a condition is detected or none fits
+    bool isFound = false;
+    while (true) {
+        // Find new best matching candidate location
+        matchingResults.locateNextMinMax(*conditionImage.scaledGray, scaleRatioManager.getScaleRatio());
+
+        // If the found Roi is out of bounds, invalid match, keep looking
+        if (!screenImage.isScaledContains(matchingResults.roi.scaled)) {
+            continue;
+        }
+
+        // Perform OCR
+        Pix *pix = getLeptonicaPix(*screenImage.fullSizeColor);
+        tessBaseAPI->SetImage(pix);
+        std::string ocrText = std::string(tessBaseAPI->GetUTF8Text());
+        if (ocrText.empty()) {
+            pixDestroy(&pix);
+            break;
+        }
+        ocrText.erase(std::remove_if(ocrText.begin(), ocrText.end(), ::isspace), ocrText.end());
+        LOGI(LOG_TAG, "Detection ocrText is : %s", ocrText.data());
+        // compare result
+        std::string::size_type idx = ocrText.find(std::string(identifying));
+        if (idx != std::string::npos) {
+            isFound = true;
+        }
+        // Cleanup
+        pixDestroy(&pix);
+        break;
+    }
+
+    // Set the results to the java object
+    detectionResult.setResults(
+            env,
+            isFound,
+            detectionRoi.fullSize.x + matchingResults.roi.fullSizeCenterX(),
+            detectionRoi.fullSize.y + matchingResults.roi.fullSizeCenterY(),
+            matchingResults.maxVal);
+}
+
 bool Detector::isResultAboveThreshold(const MatchingResults& results, const int threshold) {
     return results.maxVal > ((double) (100 - threshold) / 100);
 }
@@ -141,4 +233,13 @@ double Detector::getColorDiff(const cv::Mat& image, const cv::Mat& condition) {
         diff += abs(imageColorMeans.val[i] - conditionColorMeans.val[i]);
     }
     return (diff * 100) / (255 * 3);
+}
+
+Pix *Detector::getLeptonicaPix(const cv::Mat& image)
+{
+    // Convert OpenCV image to Leptonica Pix format
+    Pix *pix = pixCreate(image.cols, image.rows, image.elemSize() * 8);
+    // Copy image data to Pix
+    memcpy(pixGetData(pix), image.data, image.total() * image.elemSize());
+    return pix;
 }

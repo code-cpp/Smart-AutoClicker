@@ -20,6 +20,8 @@
 
 #include <jni.h>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <tesseract/baseapi.h>
+#include <leptonica/allheaders.h>
 
 #include "detection_image.hpp"
 #include "matching_results.hpp"
@@ -51,6 +53,9 @@ namespace smartautoclicker {
         /** The results of the condition detection. */
         DetectionResult detectionResult = DetectionResult();
 
+        /** Tesseract OCR engine */
+        tesseract::TessBaseAPI *tessBaseAPI;
+
         /**
          * Check if the provided condition is found in the current screen image.
          * The screen image should be set with [setScreenImage], and the detection roi should be up to date before
@@ -62,11 +67,14 @@ namespace smartautoclicker {
          */
         void match(JNIEnv *env, jobject conditionImage, int threshold);
 
+        void matchOCR(JNIEnv *env, jobject conditionImage, const char* identifying);
+
         /** Verify if the matching result is above the provided threshold. */
         static bool isResultAboveThreshold(const MatchingResults& results, int threshold);
         /** Get the percentage of color difference between two images. Result is expressed in [0..1]. */
         static double getColorDiff(const cv::Mat& image, const cv::Mat& condition);
 
+        static Pix *getLeptonicaPix(const cv::Mat& image);
 
     public:
 
@@ -76,7 +84,7 @@ namespace smartautoclicker {
          * @param env current java env.
          * @param results the result java object to update upon [detectCondition] calls.
          */
-        void initialize(JNIEnv *env, jobject results);
+        void initialize(JNIEnv *env, jobject results, jstring dataPath, jstring language);
 
         /**
          * Release the detector.
@@ -129,6 +137,30 @@ namespace smartautoclicker {
          * @param threshold the minimum detection confidence to consider the detection position.
          */
         void detectCondition(JNIEnv *env, jobject conditionImage, int x, int y, int width, int height, int threshold);
+
+        /**
+         * Check if the provided image is contained in the image defined with [setScreenImage].
+         * [detectionResult] structure will be updated accordingly.
+         *
+         * @param env current java env.
+         * @param conditionImage the image to search.
+         * @param identifying the recognised information to consider the detection position.
+         */
+        void detectConditionOCR(JNIEnv *env, jobject conditionImage, jstring identifying);
+
+        /**
+         * Check if the provided image is contained in a specific area within the image defined with [setScreenImage].
+         * [detectionResult] structure will be updated accordingly.
+         *
+         * @param env current java env.
+         * @param conditionImage the image to search.
+         * @param x the left position of the area to search in.
+         * @param y the top position of the area to search in.
+         * @param width the width of the area to search in.
+         * @param height the height of the area to search in.
+         * @param identifying the recognised information to consider the detection position.
+         */
+        void detectConditionOCR(JNIEnv *env, jobject conditionImage, int x, int y, int width, int height, jstring identifying);
     };
 }
 

@@ -24,6 +24,8 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION"/>
     <!-- Needed to display the overlay_menu over other apps -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <!-- Needed to download the tessdata from github.com/tesseract-ocr/tessdata -->
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:name="${smartAutoClickerApplication}"

@@ -24,10 +24,12 @@ extern "C" {
     JNIEXPORT jlong JNICALL Java_com_buzbuz_smartautoclicker_core_detection_NativeDetector_newDetector(
             JNIEnv *env,
             jobject self,
-            jobject result) {
+            jobject result,
+            jstring dataPath,
+            jstring language) {
 
         auto detector = new Detector();
-        detector->initialize(env, result);
+        detector->initialize(env, result, dataPath, language);
         return reinterpret_cast<jlong>(detector);
     }
 
@@ -69,6 +71,28 @@ extern "C" {
             jint threshold) {
 
         getObject(env, self)->detectCondition(env, conditionBitmap, x, y, width, height, threshold);
+    }
+
+    JNIEXPORT void JNICALL Java_com_buzbuz_smartautoclicker_core_detection_NativeDetector_detectOCR(
+            JNIEnv *env,
+            jobject self,
+            jobject conditionBitmap,
+            jstring identifying) {
+
+        getObject(env, self)->detectConditionOCR(env, conditionBitmap, identifying);
+    }
+
+    JNIEXPORT void JNICALL Java_com_buzbuz_smartautoclicker_core_detection_NativeDetector_detectOCRAt(
+            JNIEnv *env,
+            jobject self,
+            jobject conditionBitmap,
+            jint x,
+            jint y,
+            jint width,
+            jint height,
+            jstring identifying) {
+
+        getObject(env, self)->detectConditionOCR(env, conditionBitmap, x, y, width, height, identifying);
     }
 
     JNIEXPORT void JNICALL Java_com_buzbuz_smartautoclicker_core_detection_NativeDetector_deleteDetector(

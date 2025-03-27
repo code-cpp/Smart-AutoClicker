@@ -19,6 +19,13 @@ package com.buzbuz.smartautoclicker.core.detection
 import android.graphics.Bitmap
 import android.graphics.Rect
 import androidx.annotation.Keep
+import android.os.Environment
+import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStream
+import java.net.HttpURLConnection
+import java.net.URL
+
 
 /**
  * Native implementation of the image detector.
@@ -50,9 +57,20 @@ class NativeDetector private constructor() : ImageDetector {
     private var isClosed: Boolean = false
 
     override fun init() {
-        nativePtr = newDetector(detectionResult)
-    }
+        val downloadDir = getDefaultDownloadPath()
 
+        if (!isTessDataExists(downloadDir, "eng")) {
+            downloadTessData(downloadDir, "eng")
+        }
+        if (!isTessDataExists(downloadDir, "chi_sim")) {
+            downloadTessData(downloadDir, "chi_sim")
+        }
+
+        val tessPath = File(downloadDir, "tesseract/tessdata").absolutePath
+        val language = "eng+chi_sim"
+
+        nativePtr = newDetector(detectionResult, tessPath, language)
+    }
 
     override fun close() {
         if (isClosed) return
@@ -91,13 +109,63 @@ class NativeDetector private constructor() : ImageDetector {
         return detectionResult.copy()
     }
 
+    override fun detectCondition(conditionBitmap: Bitmap, identifying: String): DetectionResult {
+        if (isClosed) return detectionResult.copy()
+
+        detectOCR(conditionBitmap, identifying)
+        return detectionResult.copy()
+    }
+
+    override fun detectCondition(conditionBitmap: Bitmap, position: Rect, identifying: String): DetectionResult {
+        if (isClosed) return detectionResult.copy()
+
+        detectOCRAt(conditionBitmap, position.left, position.top, position.width(), position.height(), identifying, detectionResult)
+        return detectionResult.copy()
+    }
+
+    /* tesseract provate oprate funtion */
+    private fun getDefaultDownloadPath(): String {
+        val downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        return downloadDir.absolutePath;
+    }
+
+    private fun isTessDataExists(parentDir: String, language: String): Boolean {
+        val tessPath = File(parentDir, "tesseract/tessdata")
+        val trainingDataFile = File(tessPath, "$language.traineddata")
+        return trainingDataFile.exists()
+    }
+
+    private fun downloadTessData(parentDir: String, language: String) {
+        val tessPath = File(parentDir, "tesseract/tessdata")
+        if (!tessPath.exists()) {
+            tessPath.mkdirs()
+        }
+
+        val url = URL("https://github.com/tesseract-ocr/tessdata/raw/main/$language.traineddata")
+        val connection: HttpURLConnection = url.openConnection() as HttpURLConnection
+        connection.connect()
+
+        val inputStream: InputStream = connection.inputStream
+        val fileOutputStream = FileOutputStream(File(tessPath, "$language.traineddata"))
+
+        val buffer = ByteArray(1024)
+        var len: Int
+        while (inputStream.read(buffer).also { len = it } != -1) {
+            fileOutputStream.write(buffer, 0, len)
+        }
+
+        fileOutputStream.close()
+        inputStream.close()
+        connection.disconnect()
+    }
+
     /**
      * Creates the detector. Must be called before any other methods.
      * Call [close] to release resources once the detection process is finished.
      *
      * @return the pointer of the native detector object.
      */
-    private external fun newDetector(result: DetectionResult): Long
+    private external fun newDetector(result: DetectionResult, tessPath: String, language: String): Long
 
     /**
      * Deletes the native detector.
@@ -146,6 +214,34 @@ class NativeDetector private constructor() : ImageDetector {
         width: Int,
         height: Int,
         threshold: Int,
+        result: DetectionResult
+    )
+
+    /**
+     * Native method for detecting if the bitmap is in the whole current screen bitmap.
+     *
+     * @param conditionBitmap the condition to detect in the screen.
+     * @param identifying the recognised information to consider the detection position.
+     */
+    private external fun detectOCR(conditionBitmap: Bitmap, identifying: String)
+
+    /**
+     * Native method for detecting if the bitmap is at a specific position in the current screen bitmap.
+     *
+     * @param conditionBitmap the condition to detect in the screen.
+     * @param x the horizontal position of the condition.
+     * @param y the vertical position of the condition.
+     * @param width the width of the condition.
+     * @param height the height of the condition.
+     * @param identifying the recognised information to consider the detection position.
+     */
+    private external fun detectOCRAt(
+        conditionBitmap: Bitmap,
+        x: Int,
+        y: Int,
+        width: Int,
+        height: Int,
+        identifying: String,
         result: DetectionResult
     )
 }
